@@ -49,7 +49,7 @@ Vercel does not provide an official PHP runtime. This project uses the community
 
 The Vercel setup also requires remote MySQL-compatible storage and a **private** S3-compatible bucket. Vercel function filesystems are not persistent: PHP sessions and uploaded patient photos must not rely on local disk.
 
-1. Create a Vercel project from this repository and keep the repository root as the project root. The included `vercel.json` maps the app's existing `/caretrack/...` URLs and invokes PHP files with PHP 8.3.
+1. Create a Vercel project from this repository and keep the repository root as the project root. The included `vercel.json` registers the PHP runtime only for `api/*.php`; `api/index.php` safely dispatches the existing `/caretrack/...` PHP URLs, and Vercel serves the assets from `/assets`.
 2. Create an external MySQL or MariaDB database reachable from Vercel. Import [`database/caretrack_db.sql`](database/caretrack_db.sql) into a new database. For an existing database, apply [`database/session-migration.sql`](database/session-migration.sql) once.
 3. Create a private S3-compatible bucket with default encryption enabled. Create credentials limited to reading, writing, and deleting objects under `patient-photos/`. Do not enable public access.
 4. Add these environment variables to the Vercel project for each deployment environment:

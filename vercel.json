@@ -1,21 +1,25 @@
 {
   "functions": {
-    "**/*.php": {
+    "api/*.php": {
       "runtime": "vercel-php@0.7.4"
     }
   },
   "rewrites": [
     {
       "source": "/",
-      "destination": "/index.php"
+      "destination": "/api/index.php?path=index.php"
     },
     {
       "source": "/caretrack",
-      "destination": "/index.php"
+      "destination": "/api/index.php?path=index.php"
+    },
+    {
+      "source": "/caretrack/assets/:path*",
+      "destination": "/assets/:path*"
     },
     {
       "source": "/caretrack/:path*",
-      "destination": "/:path*"
+      "destination": "/api/index.php?path=:path*"
     }
   ]
 }
