@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+vendor/
 
 # Patient uploads and other local data must never be committed
 uploads/patient-photos/*

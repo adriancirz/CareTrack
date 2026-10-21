@@ -13,12 +13,15 @@ $tables = [
 ];
 
 $databaseReady = true;
+$hasUsers = false;
 
 try {
     foreach ($tables as $table) {
         $statement = $pdo->query("SELECT 1 FROM `{$table}` LIMIT 1");
         $statement->fetch();
     }
+
+    $hasUsers = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn() > 0;
 } catch (PDOException $exception) {
     error_log('CareTrack schema check failed: ' . $exception->getMessage());
     $databaseReady = false;
@@ -30,7 +33,8 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CareTrack - Setup Check</title>
+    <title>CareTrack</title>
+    <link rel="icon" type="image/svg+xml" href="/caretrack/assets/caretrack-mark.svg">
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
@@ -60,6 +64,18 @@ try {
                     <p class="mb-0">
                         <strong>Stage 1:</strong> Setup verification passed.
                     </p>
+                    <div class="mt-4">
+                        <?php if ($hasUsers): ?>
+                            <a class="btn btn-primary" href="login.php">
+                                Sign in
+                            </a>
+                        <?php else: ?>
+                            <p>No accounts exist yet. Create the initial administrator to get started.</p>
+                            <a class="btn btn-primary" href="setup-admin.php">
+                                Create initial admin
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 <?php else: ?>
                     <div class="alert alert-danger">
                         The database schema could not be verified.

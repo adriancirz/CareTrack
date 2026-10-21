@@ -32,9 +32,11 @@ if (!$patient) {
 
 log_activity($pdo, 'patient.viewed', 'patient', $patientId);
 
-$photoFilename = $patient['profile_image'];
-$hasPhoto = is_string($photoFilename)
-    && preg_match('/\A[a-f0-9]{32}\.(jpg|png|webp)\z/', $photoFilename) === 1;
+$hasPhoto = is_string($patient['profile_image'])
+    && preg_match(
+        '/\A(?:patient-photos\/)?[a-f0-9]{32}\.(jpg|png|webp)\z/',
+        $patient['profile_image']
+    ) === 1;
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
@@ -63,7 +65,7 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="col-md-3 text-center">
             <?php if ($hasPhoto): ?>
                 <img
-                    src="/caretrack/uploads/patient-photos/<?= e(rawurlencode($photoFilename)) ?>"
+                    src="/caretrack/patients/photo.php?id=<?= (int) $patient['patient_id'] ?>"
                     alt="Patient photo"
                     class="img-fluid rounded-circle border"
                     style="width: 160px; height: 160px; object-fit: cover;"

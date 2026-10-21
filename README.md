@@ -43,6 +43,38 @@ CareTrack is a PHP and MySQL clinic information and appointment management syste
 
 Import the schema once into a fresh database. It is not an idempotent migration script; do not re-import it into a database containing tables or records you need to preserve.
 
+## Deploy to Vercel
+
+Vercel does not provide an official PHP runtime. This project uses the community-maintained [`vercel-php`](https://github.com/vercel-community/php) runtime, so deployment depends on that runtime continuing to work with Vercel. For a conventional PHP deployment, use a host that provides PHP and MySQL directly.
+
+The Vercel setup also requires remote MySQL-compatible storage and a **private** S3-compatible bucket. Vercel function filesystems are not persistent: PHP sessions and uploaded patient photos must not rely on local disk.
+
+1. Create a Vercel project from this repository and keep the repository root as the project root. The included `vercel.json` maps the app's existing `/caretrack/...` URLs and invokes PHP files with PHP 8.3.
+2. Create an external MySQL or MariaDB database reachable from Vercel. Import [`database/caretrack_db.sql`](database/caretrack_db.sql) into a new database. For an existing database, apply [`database/session-migration.sql`](database/session-migration.sql) once.
+3. Create a private S3-compatible bucket with default encryption enabled. Create credentials limited to reading, writing, and deleting objects under `patient-photos/`. Do not enable public access.
+4. Add these environment variables to the Vercel project for each deployment environment:
+
+   | Variable | Value |
+   | --- | --- |
+   | `CARETRACK_DB_HOST` | External database host |
+   | `CARETRACK_DB_NAME` | Database name |
+   | `CARETRACK_DB_USER` | Database username |
+   | `CARETRACK_DB_PASSWORD` | Database password |
+   | `CARETRACK_SESSION_STORAGE` | `database` |
+   | `CARETRACK_PHOTO_STORAGE` | `s3` |
+   | `CARETRACK_S3_BUCKET` | Private bucket name |
+   | `CARETRACK_S3_REGION` | Bucket region |
+   | `CARETRACK_S3_ACCESS_KEY_ID` | Restricted bucket access key |
+   | `CARETRACK_S3_SECRET_ACCESS_KEY` | Restricted bucket secret |
+   | `CARETRACK_S3_ENDPOINT` | Optional S3-compatible endpoint; omit for AWS S3 |
+
+5. Deploy, then visit `/caretrack/setup-admin.php` once to create the first administrator. Afterward, confirm setup is disabled and remove `setup-admin.php` from the deployment before inviting staff.
+6. Test login, logout, CSRF-protected forms, photo upload and display, patient editing, and photo deletion against the deployed services. Do not import real patient data during testing.
+
+The database session table uses MySQL named locks to avoid concurrent requests overwriting a user's session. Verify that the chosen database supports `GET_LOCK` and `RELEASE_LOCK`. If moving existing patient records, migrate their photos into the private bucket under `patient-photos/` and retain the matching filenames in `patients.profile_image`; local ignored upload files are not part of a Git deployment.
+
+This project is an educational starting point, not a certified clinical system. Do not use real patient information unless the deployment, storage location, access controls, backups, and legal/privacy requirements have been independently reviewed and approved.
+
 ## How the system works
 
 ### Accounts and permissions
